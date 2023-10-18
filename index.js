@@ -72,6 +72,11 @@ async function run() {
       const result = await productCollection.findOne(query)
       res.send(result)
     })
+    // app.put("/brand/:id" async(req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) }
+    //   const options = { upsert: true };
+    // })
 
     // cart related APIs
 
@@ -83,6 +88,13 @@ async function run() {
     app.get("/cart", async (req, res) => {
       const cursor = cartCollection.find()
       const result = await cursor.toArray()
+      res.send(result)
+    })
+    app.delete("/cart/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: id}
+      const result = await cartCollection.deleteOne(query)
+      console.log(id);
       res.send(result)
     })
 
