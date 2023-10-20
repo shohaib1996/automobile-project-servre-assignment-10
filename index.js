@@ -35,7 +35,7 @@ async function run() {
 
     const brandCollection = client.db("brandDB").collection("brands");
     const productCollection = client.db("brandDB").collection("products")
-    const cartCollection = client.db("brandDB").collection("cart")
+    // const cartCollection = client.db("brandDB").collection("cart")
 
     app.post("/brands", async (req, res) => {
       const brads = req.body;
@@ -72,28 +72,56 @@ async function run() {
       const result = await productCollection.findOne(query)
       res.send(result)
     })
-    // app.put("/brand/:id" async(req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) }
-    //   const options = { upsert: true };
-    // })
+    app.put("/brand/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const options = { upsert: true }
+      const updateProduct = req.body;
+      const newProduct = {
+        $set: {
+          product_name: updateProduct.product_name,
+          img: updateProduct.img,
+          brand_name: updateProduct.brand_name,
+          short_desc: updateProduct.short_desc,
+          price: updateProduct.price,
+          rating: updateProduct.rating,
+          vehicle_type: updateProduct.vehicle_type,
+        },
+      }
+      const result = await productCollection.updateOne(query, newProduct, options)
+      res.send(result)
+    })
 
     // cart related APIs
 
+    function getUserCartCollection(userId) {
+      return client.db("brandDB").collection(`cart_${userId}`);
+    }
+    let idUser ;
+
+    
     app.post("/cart", async (req, res) => {
       const cart = req.body;
-      const result = await cartCollection.insertOne(cart);
-      res.send(result)
-    })
+      const userId = cart.userId;
+      idUser = userId;
+      const userCartCollection = getUserCartCollection(userId);
+      const result = await userCartCollection.insertOne(cart);
+      res.send(result);
+    });
+    
     app.get("/cart", async (req, res) => {
-      const cursor = cartCollection.find()
-      const result = await cursor.toArray()
-      res.send(result)
-    })
-    app.delete("/cart/:id", async(req, res) => {
+      const userId = idUser;
+      const userCartCollection = getUserCartCollection(userId);
+      const cursor = userCartCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.delete("/cart/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: id}
-      const result = await cartCollection.deleteOne(query)
+      const userId = idUser;
+      const query = { _id: id }
+      const userCartCollection = getUserCartCollection(userId);
+      const result = await userCartCollection.deleteOne(query)
       console.log(id);
       res.send(result)
     })
