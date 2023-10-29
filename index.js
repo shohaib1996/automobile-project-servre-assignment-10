@@ -111,11 +111,21 @@ app.post("/cart", async (req, res) => {
 
 })
 app.get("/cart", async (req, res) => {
-  const cursor = cartCollection.find()
-  const result = await cursor.toArray()
-  res.send(result);
+  // const currentId = req.query.currentId;
+  const email = req.query.email;
 
-})
+  const filter = {
+    $and: [
+      // { currentId: currentId },
+      { email: email }
+    ]
+  };
+
+  const cursor = cartCollection.find(filter);
+  const result = await cursor.toArray();
+  res.send(result);
+});
+
 app.delete("/cart/:id", async (req, res) => {
   const id = req.params.id;
   const query = { _id: new ObjectId(id) }
@@ -124,6 +134,7 @@ app.delete("/cart/:id", async (req, res) => {
   res.send(result)
 })
 run().catch(console.dir);
+
 
 
 app.listen(port, () => {
